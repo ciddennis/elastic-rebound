@@ -1,6 +1,10 @@
+require "elastic/rebound"
+require "elastic/rebound/strategy"
+require 'lucene'
+
 module Elastic
   module Rebound
-    class SimpleStrategy < Strategy
+    class SimpleStrategy < Elastic::Rebound::Strategy
       attr_accessor :full_text, :must_match, :must_not_match, :full_text_fields
 
       def initialize(index_name, object_type)
@@ -28,7 +32,7 @@ module Elastic
 
         # If there is a search text then add it in
         if @full_text.present?
-          query[:filtered][:query] = {:multi_match => {:query => Lucene::escape_query(@full_text), :fields => full_text_fields}}
+          query[:filtered][:query] = {:multi_match => {:query => Lucene::escape_query(@full_text), :fields => full_text_fields , :operator => "and"} }
         else
           query[:filtered][:query] = {:queryString => {:query => "*"}}
         end

@@ -14,37 +14,10 @@ module Elastic
     @@index_client =  nil
     @@config = {}
 
+    def self.config=(data)
+      @@config = data
+    end
     def self.config
-      @@config = {
-        :object_types => {
-          Applet => {
-            :active_record => true,
-            :indexers => {
-              AppletIndexAdaptor => {
-
-              }
-            }
-          },
-          App => {
-            :active_record => true,
-            :indexers => {
-              AppIndexAdaptor => {
-
-              }
-            }
-          },
-          Caplet => {
-            :active_record => true,
-            :indexers => {
-              CapletIndexAdaptor => {
-
-              }
-            }
-          }
-        },
-        :elastic_search_url => configatron.elasticsearch.url
-      }
-
       @@config
     end
 
@@ -52,29 +25,10 @@ module Elastic
       @@index_client =  @@index_client || ElasticSearch.new(Elastic::Rebound.config[:elastic_search_url])
     end
 
-    def self.simple_test
-
-      strategy = SearchService::AppletIndexAdaptor::AppletSearchStrategy.new
-      strategy.full_text = "title"
-      strategy.must_match = [strategy.simple_field(:title,"test"),strategy.simple_field(:description ,"test")]
-      strategy.must_not_match = [strategy.simple_field(:title,"your"),strategy.simple_field(:description ,"character")]
-      strategy.per_page = 50
-      strategy.page = 1
-      strategy.sort = "title.sortable"
-      result = strategy.search
-
-      ids = result.results.map(&:id)
-      ids2 = result.results(true).map(&:id)
-
-      pp ids
-      pp ids2
-
+    def self.status
+      index =   Elastic::Rebound.config[:object_types].try(:[],:indexers).try(:[],0)
+      Elastic::Rebound.index_status(index) if index
     end
-    def self.test_reindex
-      Elastic::Rebound.reindex_all(Applet)
-    end
-
-
 
     def self.unindex(indexable)
       if Elastic::Rebound.config[:object_types][indexable.class]

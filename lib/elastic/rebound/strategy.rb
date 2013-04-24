@@ -1,5 +1,5 @@
 require 'lucene'
-
+require "elastic/rebound/result"
 #
 # Extend this class to provide custom search strategy.
 #
@@ -34,7 +34,7 @@ module Elastic
 
       # Create a wrapper around the search results. This factory method allows us to set extra vars we might need.
       def create_search_result
-        Elastic::Rebound.new(self)
+        Elastic::Rebound::Result.new(self)
       end
     end
   end

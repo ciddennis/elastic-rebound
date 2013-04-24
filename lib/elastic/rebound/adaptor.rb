@@ -1,3 +1,5 @@
+require "elastic/rebound"
+
 module Elastic
   module Rebound
     class Adaptor

@@ -5,12 +5,14 @@ require 'lucene'
 module Elastic
   module Rebound
     class SimpleStrategy < Elastic::Rebound::Strategy
-      attr_accessor :full_text, :must_match, :must_not_match, :full_text_fields
+      attr_accessor :full_text, :must_match, :must_not_match, :full_text_fields, :should_match
 
       def initialize(index_name, object_type)
         @full_text = nil
         @must_match = []
         @must_not_match = []
+        @should_match  = []
+        @full_text_fields = ["_all"]
         super(index_name, object_type)
       end
 
@@ -25,6 +27,7 @@ module Elastic
                     :bool => {
                         :must => [],
                         :must_not => [],
+                        :should => []
                     }
                 }
             }
@@ -46,6 +49,16 @@ module Elastic
           query[:filtered][:filter][:bool].delete(:must)
         end
 
+        # Add the  should have match here
+        if @should_match.size > 0
+          @should_match.each do |item|
+            query[:filtered][:filter][:bool][:should] << item
+          end
+        else
+          query[:filtered][:filter][:bool].delete(:should)
+        end
+
+
         # Add the must  NOT have match here
         if @must_not_match.size > 0
           @must_not_match.each do |item|
@@ -65,7 +78,7 @@ module Elastic
 
         search_options[:index] = @index_name
         search_options[:type] = @object_type
-        #search_options[:explain] = true
+          #search_options[:explain] = true
 
         result = create_search_result
         result.hit = Elastic::Rebound.client.search({:query => query}, search_options)

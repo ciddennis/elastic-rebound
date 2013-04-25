@@ -13,10 +13,35 @@ module Elastic
 
     @@index_client =  nil
     @@config = {}
+    @@testing_mode = false
 
     def self.config=(data)
       @@config = data
     end
+
+    def self.testing_mode(mode = true)
+      @@testing_mode = mode
+    end
+
+    # Example Config
+    # Elastic::Rebound.config = {
+    #    :object_types => {
+    #        Applet => {
+    #            :active_record => true,
+    #            :indexers => {
+    #                SearchService::AppletIndexAdaptor => {}
+    #            }
+    #        },
+    #        App => {
+    #            :active_record => true,
+    #            :indexers => {
+    #                SearchService::AppIndexAdaptor => {}
+    #            }
+    #        }
+    #    },
+    #    :elastic_search_url => configatron.elasticsearch.url
+    # }
+
     def self.config
       @@config
     end
@@ -34,10 +59,11 @@ module Elastic
       if Elastic::Rebound.config[:object_types][indexable.class]
         Elastic::Rebound.config[:object_types][indexable.class][:indexers].each_pair do |idxer,value|
           adapter = idxer.new
-          if adapter.async?
+          if adapter.async? && !@@testing_mode
             Resque.enqueue(Elastic::Rebound::IndexJob, adapter.class.name, indexable.id, indexable.class.name,true)
           else
             adapter.unindex(indexable.id)
+            adapter.refresh_index if @@testing_mode
           end
         end
       end
@@ -47,11 +73,12 @@ module Elastic
       if Elastic::Rebound.config[:object_types][indexable.class]
         Elastic::Rebound.config[:object_types][indexable.class][:indexers].each_pair do |idxer,value|
           adapter = idxer.new
-          if adapter.async?
+          if adapter.async? && !@@testing_mode
             Resque.enqueue(Elastic::Rebound::IndexJob, adapter.class.name, indexable.id, indexable.class.name,false)
           else
             data = adapter.index_data(indexable)
             adapter.index(data)
+            adapter.refresh_index if @@testing_mode
           end
         end
       end

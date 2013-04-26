@@ -1,3 +1,8 @@
+# NOTICE - NOTICE - NOTICE - NOTICE - NOTICE - NOTICE - NOTICE - NOTICE
+# This a work in progress do not expect this to work in progress.
+# NOTICE - NOTICE - NOTICE - NOTICE - NOTICE - NOTICE - NOTICE - NOTICE
+
+
 # Elastic::Rebound
 
 TODO: Write a gem description

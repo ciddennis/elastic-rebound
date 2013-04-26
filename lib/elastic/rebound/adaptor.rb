@@ -44,8 +44,10 @@ module Elastic
       #
       def index(data, refresh = false)
         if data.kind_of?(Array)
-          data.each do |d|
-            Elastic::Rebound.client.index(d, :type => @object_name, :index => @index_name, :id => d[:id])
+          Elastic::Rebound.client.bulk do
+            data.each do |d|
+              Elastic::Rebound.client.index(d, :type => @object_name, :index => @index_name, :id => d[:id])
+            end
           end
         else
           Elastic::Rebound.client.index(data, :type => @object_name, :index => @index_name, :id => data[:id])

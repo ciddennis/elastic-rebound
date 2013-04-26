@@ -23,6 +23,7 @@ module Elastic
 
           after_rollback &rollback_self
           after_commit &index_self
+
         end
       end
 

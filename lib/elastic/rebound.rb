@@ -85,6 +85,15 @@ module Elastic
       end
     end
 
+    def self.flush_index(kind)
+       if Elastic::Rebound.config[:object_types][kind]
+         Elastic::Rebound.config[:object_types][kind][:indexers].each_pair do |idxer,value|
+           adapter = idxer.new
+           adapter.refresh_index
+         end
+       end
+     end
+
     #require "search_service/search_service";SearchService.reindex_all(Applet)
     def self.reindex_all(kind_to_index,options = {})
       adaptors = []

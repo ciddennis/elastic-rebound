@@ -1,5 +1,3 @@
-require "elastic/rebound"
-
 module Elastic
   module Rebound
     module ActiveCallback

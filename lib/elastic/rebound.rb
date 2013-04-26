@@ -6,6 +6,7 @@ require "elastic/rebound/result"
 require "elastic/rebound/simple_strategy"
 require "elastic/rebound/strategy"
 require "elastic/rebound/active_callback"
+require "resque"
 
 
 module Elastic
@@ -105,5 +106,17 @@ module Elastic
         end
       end
     end
+
+    ESCAPE_LUCENE_REGEX = /
+      ( [-+!\(\)\{\}\[\]^"~*?:\\] # A special character
+        | &&                      # Boolean &&
+        | \|\|                    # Boolean ||
+      )/x.freeze
+
+    # Escapes per https://lucene.apache.org/core/3_6_0/queryparsersyntax.html#Escaping
+    def self.escape_query(query)
+      query.gsub(ESCAPE_LUCENE_REGEX) { |m| "\\#{m}" }
+    end
+
   end
 end

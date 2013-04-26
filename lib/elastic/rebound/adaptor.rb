@@ -48,7 +48,6 @@ module Elastic
             Elastic::Rebound.client.index(d, :type => @object_name, :index => @index_name, :id => d[:id])
           end
         else
-          #pp data
           Elastic::Rebound.client.index(data, :type => @object_name, :index => @index_name, :id => data[:id])
         end
 

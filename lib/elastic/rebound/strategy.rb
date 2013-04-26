@@ -1,4 +1,3 @@
-require 'lucene'
 require "elastic/rebound/result"
 #
 # Extend this class to provide custom search strategy.
@@ -27,7 +26,7 @@ module Elastic
       end
 
       def simple_field(field, value)
-        {:term => {field => value.kind_of?(String) ? Lucene::escape_query(value) : value}}
+        {:term => {field => value.kind_of?(String) ? Elastic::Rebound.escape_query(value) : value}}
       end
 
       protected

@@ -1,6 +1,4 @@
-require "elastic/rebound"
 require "elastic/rebound/strategy"
-require 'lucene'
 
 module Elastic
   module Rebound
@@ -35,7 +33,7 @@ module Elastic
 
         # If there is a search text then add it in
         if @full_text.present?
-          query[:filtered][:query] = {:multi_match => {:query => Lucene::escape_query(@full_text), :fields => full_text_fields , :operator => "and"} }
+          query[:filtered][:query] = {:multi_match => {:query => Elastic::Rebound.escape_query(@full_text), :fields => full_text_fields , :operator => "and"} }
         else
           query[:filtered][:query] = {:queryString => {:query => "*"}}
         end
@@ -81,6 +79,7 @@ module Elastic
           #search_options[:explain] = true
 
         result = create_search_result
+
         result.hit = Elastic::Rebound.client.search({:query => query}, search_options)
 
         result

@@ -14,7 +14,6 @@ module Elastic
       #       elastic search results
       def results(objects = false)
 
-        #pp @hit.hits
         if objects
           return @cached_objects if @cached_objects
           ids = @hit.hits.map(&:id)

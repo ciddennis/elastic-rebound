@@ -86,7 +86,7 @@ module Elastic
     end
 
     #require "search_service/search_service";SearchService.reindex_all(Applet)
-    def self.reindex_all(kind_to_index)
+    def self.reindex_all(kind_to_index,options = {})
       adaptors = []
 
       Elastic::Rebound.config[:object_types][kind_to_index][:indexers].each_pair do |idxer,value|
@@ -96,7 +96,7 @@ module Elastic
         a.create_index
       end
 
-      kind_to_index.find_in_batches do  |group|
+      kind_to_index.find_in_batches(options) do  |group|
         index_data = []
 
         group.each do |o|

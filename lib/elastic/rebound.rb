@@ -111,6 +111,7 @@ module Elastic
         group.each do |o|
           adaptors.each do |a|
             a.index([a.index_data(o)])
+            a.refresh_index
           end
         end
       end

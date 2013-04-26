@@ -14,8 +14,8 @@ module Elastic
 
           rollback_self = lambda {
             if self.persisted?
-              self.reload
-              Elastic::Rebound.index(self)
+              o = self.class.find_by_id(self.id)
+              Elastic::Rebound.index(o)
             else
               Elastic::Rebound.unindex(self)
             end

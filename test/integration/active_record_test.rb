@@ -102,6 +102,23 @@ class ActiveRecordTest < Test::Unit::TestCase
       assert(r.results(true)[0].kind_of?(Simple))
     end
 
+
+    should "not delete index because we pass in null" do
+      s = Simple.new(:title => "test title", :description => "test description")
+      s.save
+
+      a = SimpleIndexAdaptor::AllSearchStrategy.new
+      r = a.search
+      assert(r.results(true)[0].kind_of?(Simple))
+
+      a2 = SimpleIndexAdaptor.new
+      a2.unindex(nil)
+
+      a = SimpleIndexAdaptor::AllSearchStrategy.new
+      r = a.search
+      assert(r.results(true)[0].kind_of?(Simple))
+    end
+
   end
 
 

@@ -63,8 +63,10 @@ module Elastic
       # @param refresh Call refresh on elastic search after requesting indexing.
       #
       def unindex(object_id, refresh = false)
-        Elastic::Rebound.client.delete(object_id, :type => @object_name, :index => @index_name)
-        refresh_index if refresh
+        if object_id
+          Elastic::Rebound.client.delete(object_id, :type => @object_name, :index => @index_name)
+          refresh_index if refresh
+        end
       end
 
       #

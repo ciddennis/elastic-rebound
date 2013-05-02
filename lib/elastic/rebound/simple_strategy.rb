@@ -33,8 +33,8 @@ module Elastic
 
         # If there is a search text then add it in
         if @full_text.present?
-          #query[:filtered][:query] = {:multi_match => {:query => Elastic::Rebound.escape_query(@full_text), :fields => full_text_fields , :operator => "and"} }
-          query[:filtered][:query] = {:queryString => {:query => Elastic::Rebound.escape_query(@full_text), :default_operator => "and"}}
+          query[:filtered][:query] = {:multi_match => {:query => Elastic::Rebound.escape_query(@full_text), :fields => full_text_fields , :operator => "and"} }
+          #query[:filtered][:query] = {:queryString => {:query => Elastic::Rebound.escape_query(@full_text), :default_operator => "and"}}
         else
           query[:filtered][:query] = {:queryString => {:query => "*"}}
         end

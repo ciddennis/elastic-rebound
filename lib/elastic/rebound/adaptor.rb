@@ -79,10 +79,21 @@ module Elastic
       #
       # Should indexing be done in a background job?
       #
-      def async?
+      # @param indexable This is the object about to be index.  This is passed in so that
+      # the implementing adaptor has a chance to change based on state.
+      #
+      def async?(indexable = nil)
         false
       end
 
+      #
+      # Provide a call back so that adaptors can do post indexing actions if needed.
+      #
+      # @param indexable This is the object about to be index.
+      #
+      def after_index(indexable = nil)
+
+      end
 
       protected
 

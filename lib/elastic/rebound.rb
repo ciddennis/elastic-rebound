@@ -60,7 +60,7 @@ module Elastic
       if Elastic::Rebound.config[:object_types][indexable.class]
         Elastic::Rebound.config[:object_types][indexable.class][:indexers].each_pair do |idxer,value|
           adapter = idxer.new
-          if adapter.async? && !@@testing_mode
+          if adapter.async?(indexable) && !@@testing_mode
             Resque.enqueue(Elastic::Rebound::IndexJob, adapter.class.name, indexable.id, indexable.class.name,true)
           else
             adapter.unindex(indexable.id)
@@ -74,11 +74,12 @@ module Elastic
       if Elastic::Rebound.config[:object_types][indexable.class]
         Elastic::Rebound.config[:object_types][indexable.class][:indexers].each_pair do |idxer,value|
           adapter = idxer.new
-          if adapter.async? && !@@testing_mode
+          if adapter.async?(indexable) && !@@testing_mode
             Resque.enqueue(Elastic::Rebound::IndexJob, adapter.class.name, indexable.id, indexable.class.name,false)
           else
             data = adapter.index_data(indexable)
             adapter.index(data)
+            adapter.after_index(indexable)
             adapter.refresh_index if @@testing_mode
           end
         end

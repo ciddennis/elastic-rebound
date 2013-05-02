@@ -23,6 +23,7 @@ module Elastic
           if indexable
             data = adp_klass.index_data(indexable)
             adp_klass.index(data)
+            adp_klass.after_index(indexable)
           end
 
         end

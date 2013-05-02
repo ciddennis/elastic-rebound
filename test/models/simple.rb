@@ -32,7 +32,7 @@ class SimpleIndexAdaptor < Elastic::Rebound::Adaptor
         end
   end
 
-  def async?
+  def async?(indexable = nil)
     true
   end
 

@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Cid Dennis"]
   spec.email         = ["cid.dennis@gmail.com"]
   spec.platform    = Gem::Platform::RUBY
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = "Elastic Search Interface Gem"
+  spec.summary       = "Elastic Search Interface Gem"
   spec.homepage      = ""
   spec.license       = "MIT"
 

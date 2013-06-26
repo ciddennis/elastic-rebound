@@ -118,8 +118,9 @@ module Elastic
       end
     end
 
+
     ESCAPE_LUCENE_REGEX = /
-      ( [-+!\(\)\{\}\[\]^"~*?:\\] # A special character
+      ( [-+!\(\)\{\}\[\]^"~*?:\\\/] # A special character
         | &&                      # Boolean &&
         | \|\|                    # Boolean ||
       )/x.freeze

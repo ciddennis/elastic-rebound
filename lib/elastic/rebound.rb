@@ -57,8 +57,8 @@ module Elastic
     end
 
     def self.unindex(indexable)
-      if Elastic::Rebound.config[:object_types][indexable.class]
-        Elastic::Rebound.config[:object_types][indexable.class][:indexers].each_pair do |idxer,value|
+      if Elastic::Rebound.config[:object_types][indexable.class.name.to_sym]
+        Elastic::Rebound.config[:object_types][indexable.class.name.to_sym][:indexers].each_pair do |idxer,value|
           adapter = idxer.new
           if adapter.async?(indexable) && !@@testing_mode
             Resque.enqueue(Elastic::Rebound::IndexJob, adapter.class.name, indexable.id, indexable.class.name,true)
@@ -71,8 +71,8 @@ module Elastic
     end
 
   	def self.index(indexable)
-      if Elastic::Rebound.config[:object_types][indexable.class]
-        Elastic::Rebound.config[:object_types][indexable.class][:indexers].each_pair do |idxer,value|
+      if Elastic::Rebound.config[:object_types][indexable.class.name.to_sym]
+        Elastic::Rebound.config[:object_types][indexable.class.name.to_sym][:indexers].each_pair do |idxer,value|
           adapter = idxer.new
           if adapter.async?(indexable) && !@@testing_mode
             Resque.enqueue(Elastic::Rebound::IndexJob, adapter.class.name, indexable.id, indexable.class.name,false)
@@ -87,8 +87,8 @@ module Elastic
     end
 
     def self.flush_index(kind)
-       if Elastic::Rebound.config[:object_types][kind]
-         Elastic::Rebound.config[:object_types][kind][:indexers].each_pair do |idxer,value|
+       if Elastic::Rebound.config[:object_types][kind.name.to_sym]
+         Elastic::Rebound.config[:object_types][kind.name.to_sym][:indexers].each_pair do |idxer,value|
            adapter = idxer.new
            adapter.refresh_index
          end
@@ -99,7 +99,7 @@ module Elastic
     def self.reindex_all(kind_to_index,options = {})
       adaptors = []
 
-      Elastic::Rebound.config[:object_types][kind_to_index][:indexers].each_pair do |idxer,value|
+      Elastic::Rebound.config[:object_types][kind_to_index.name.to_sym][:indexers].each_pair do |idxer,value|
         adaptors << idxer.new
       end
       adaptors.each do |a|

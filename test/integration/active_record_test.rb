@@ -17,7 +17,7 @@ class ActiveRecordTest < Test::Unit::TestCase
 
     Elastic::Rebound.config = {
         :object_types => {
-            Simple => {:active_record => true,
+            :Simple => {:active_record => true,
                        :indexers => {
                            SimpleIndexAdaptor => {}
                        }

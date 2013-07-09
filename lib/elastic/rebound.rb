@@ -48,7 +48,7 @@ module Elastic
     end
 
     def self.client
-      @@index_client =  @@index_client || ElasticSearch.new(Elastic::Rebound.config[:elastic_search_url])
+      @@index_client =  @@index_client || ElasticSearch.new(Elastic::Rebound.config[:elastic_search_url], {:auto_discovery => false})
     end
 
     def self.status
@@ -61,7 +61,7 @@ module Elastic
         Elastic::Rebound.config[:object_types][indexable.class.name.to_sym][:indexers].each_pair do |idxer,value|
           adapter = idxer.new
           if adapter.async?(indexable) && !@@testing_mode
-            Resque.enqueue(Elastic::Rebound::IndexJob, adapter.class.name, indexable.id, indexable.class.name,true)
+            Elastic::Rebound::IndexJob.perform_async(adapter.class.name, indexable.id, indexable.class.name,true)
           else
             adapter.unindex(indexable.id)
             adapter.refresh_index if @@testing_mode
@@ -75,7 +75,7 @@ module Elastic
         Elastic::Rebound.config[:object_types][indexable.class.name.to_sym][:indexers].each_pair do |idxer,value|
           adapter = idxer.new
           if adapter.async?(indexable) && !@@testing_mode
-            Resque.enqueue(Elastic::Rebound::IndexJob, adapter.class.name, indexable.id, indexable.class.name,false)
+            Elastic::Rebound::IndexJob.perform_async( adapter.class.name, indexable.id, indexable.class.name,false)
           else
             data = adapter.index_data(indexable)
             adapter.index(data)

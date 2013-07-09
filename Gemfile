@@ -3,6 +3,8 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in elastic-rebound.gemspec
 gemspec
 
+gem 'sidekiq'
+
 platform :jruby do
   gem "jdbc-sqlite3"
   gem "activerecord-jdbcsqlite3-adapter"

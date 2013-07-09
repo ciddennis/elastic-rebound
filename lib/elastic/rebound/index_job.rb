@@ -1,15 +1,17 @@
 module Elastic
   module Rebound
     class IndexJob
+      require "sidekiq"
+      include Sidekiq::Worker
 
-      @queue = :reports
+      sidekiq_options :queue => :medium,  :backtrace => true
 
       #
       # @param adaptor_class Class used to index the object.
       # @param object_id Active record object id
       # @param object_class Type of class to be indexed
       #
-      def self.perform(adaptor_class, object_id, object_class, delete_from_index)
+      def perform(adaptor_class, object_id, object_class, delete_from_index)
         adp_klass = adaptor_class.constantize.new
 
         if delete_from_index

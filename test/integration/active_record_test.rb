@@ -57,8 +57,9 @@ class ActiveRecordTest < Test::Unit::TestCase
 
     should "trigger async index on save" do
 
-      Resque.stubs(:enqueue)
-      Resque.expects(:enqueue).at_least(1)
+      Elastic::Rebound::IndexJob.stubs(:perform_async)
+      Elastic::Rebound::IndexJob.expects(:perform_async).at_least(1)
+
 
       Elastic::Rebound.testing_mode(false)
       s = Simple.new(:title => "test title", :description => "test description")
@@ -67,8 +68,8 @@ class ActiveRecordTest < Test::Unit::TestCase
     end
 
     should "trigger async index on destroy" do
-      Resque.stubs(:enqueue)
-      Resque.expects(:enqueue).at_least(2)
+      Elastic::Rebound::IndexJob.stubs(:perform_async)
+      Elastic::Rebound::IndexJob.expects(:perform_async).at_least(2)
 
       Elastic::Rebound.testing_mode(false)
       s = Simple.new(:title => "test title", :description => "test description")

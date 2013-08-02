@@ -69,8 +69,7 @@ module Elastic
           if adapter.async?(indexable) && !@@testing_mode   &&   !bulk_connection
             Elastic::Rebound::IndexJob.perform_async(adapter.class.name, indexable.id, indexable.class.name,true)
           else
-            adapter.unindex(indexable.id,false,bulk_connection)
-            adapter.refresh_index if @@testing_mode
+            adapter.unindex(indexable.id,@@testing_mode,bulk_connection)
           end
         end
       end
@@ -89,9 +88,8 @@ module Elastic
             Elastic::Rebound::IndexJob.perform_async( adapter.class.name, indexable.id, indexable.class.name,false)
           else
             data = adapter.index_data(indexable)
-            adapter.index(data,false,bulk_connection)
+            adapter.index(data,@@testing_mode,bulk_connection)
             adapter.after_index(indexable,bulk_connection)
-            adapter.refresh_index if @@testing_mode
           end
         end
       end
@@ -117,6 +115,7 @@ module Elastic
       Elastic::Rebound.config[:object_types][kind_to_index.name.to_sym][:indexers].each_pair do |idxer,value|
         adaptors << idxer.new
       end
+
       adaptors.each do |a|
         a.create_index
       end
@@ -129,11 +128,16 @@ module Elastic
 
             adaptors.each do |a|
               a.index(a.index_data(o),false,batch)
-              a.refresh_index
             end
           end
         end
       end
+
+      adaptors.each do |a|
+        a.refresh_index
+      end
+
+
     end
 
     ESCAPE_LUCENE_REGEX = /

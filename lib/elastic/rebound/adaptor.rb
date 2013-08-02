@@ -41,19 +41,20 @@ module Elastic
       #
       # @param data Array of hashes returned by the index_data method
       # @param refresh Call refresh on elastic search after requesting indexing.
+      # @param batch_connection If passed in the code  will ignore refresh and will use the passed in connection to batch request
+      # see the index_async_job.rb for example of how to use batch_connection.
       #
-      def index(data, refresh = false)
+      def index(data, refresh = false,batch_connection = nil)
+        connection  =  batch_connection ||  Elastic::Rebound.client
         if data.kind_of?(Array)
-          Elastic::Rebound.client.bulk do
             data.each do |d|
-              Elastic::Rebound.client.index(d, :type => @object_name, :index => @index_name, :id => d[:id])
+              connection.index(d, :type => @object_name, :index => @index_name, :id => d[:id])
             end
-          end
         else
-          Elastic::Rebound.client.index(data, :type => @object_name, :index => @index_name, :id => data[:id])
+          connection.index(data, :type => @object_name, :index => @index_name, :id => data[:id])
         end
 
-        refresh_index if refresh
+        refresh_index if refresh && !batch_connection
       end
 
       #
@@ -61,11 +62,13 @@ module Elastic
       #
       # @param object_id id of object to remove
       # @param refresh Call refresh on elastic search after requesting indexing.
+      # @param batch_connection If passed in the code  will ignore refresh and will use the passed in connection to batch request
       #
-      def unindex(object_id, refresh = false)
+      def unindex(object_id, refresh = false,batch_connection = nil)
+        connection  =  batch_connection ||  Elastic::Rebound.client
         if object_id
-          Elastic::Rebound.client.delete(object_id, :type => @object_name, :index => @index_name)
-          refresh_index if refresh
+          connection.delete(object_id, :type => @object_name, :index => @index_name)
+          refresh_index if refresh  && !batch_connection
         end
       end
 
@@ -91,7 +94,7 @@ module Elastic
       #
       # @param indexable This is the object about to be index.
       #
-      def after_index(indexable = nil)
+      def after_index(indexable = nil,batch_connection = nil)
 
       end
 

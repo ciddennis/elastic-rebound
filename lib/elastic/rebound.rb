@@ -48,8 +48,8 @@ module Elastic
       @@config
     end
 
-    def self.client
-      ElasticSearch.new(Elastic::Rebound.config[:elastic_search_url], {:auto_discovery => false})
+    def self.client(options = {})
+      ElasticSearch.new(Elastic::Rebound.config[:elastic_search_url], options.merge({:auto_discovery => false}))
     end
 
     def self.status

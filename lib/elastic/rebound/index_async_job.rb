@@ -21,11 +21,12 @@ module Elastic
         objects.each_pair do |class_name, ids|
           bulk_client.bulk do |batch|
 
-            if Elastic::Rebound.config[:object_types][class_name.to_sym]
-              Elastic::Rebound.config[:object_types][class_name.to_sym][:indexers].each_pair do |idxer, value|
+            clazz = Elastic::Rebound.object_class(class_name.constantize)
+            if Elastic::Rebound.config[:object_types][clazz.to_s.to_sym]
+              Elastic::Rebound.config[:object_types][clazz.to_s.to_sym][:indexers].each_pair do |idxer, value|
 
                 adapter = idxer.new
-                klass = class_name.constantize
+                klass = clazz
                 indexables = klass.where(:id => ids)
 
                 index_ids = []

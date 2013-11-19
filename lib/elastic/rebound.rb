@@ -63,6 +63,7 @@ module Elastic
     # @param indexable Object to index
     # @param bulk_connection Client bulk connection object.  See index_async_job.rb
     def self.unindex(indexable,bulk_connection = nil)
+      clazz = Elastic::Rebound.object_class(indexable)
       if Elastic::Rebound.config[:object_types][indexable.class.name.to_sym]
         Elastic::Rebound.config[:object_types][indexable.class.name.to_sym][:indexers].each_pair do |idxer,value|
           adapter = idxer.new
@@ -81,11 +82,13 @@ module Elastic
     # @param indexable Object to index
     # @param bulk_connection Client bulk connection object.  See index_async_job.rb
   	def self.index(indexable,bulk_connection = nil)
-      if Elastic::Rebound.config[:object_types][indexable.class.name.to_sym]
-        Elastic::Rebound.config[:object_types][indexable.class.name.to_sym][:indexers].each_pair do |idxer,value|
+      clazz = Elastic::Rebound.object_class(indexable.class)
+
+      if Elastic::Rebound.config[:object_types][clazz.name.to_sym]
+        Elastic::Rebound.config[:object_types][clazz.name.to_sym][:indexers].each_pair do |idxer,value|
           adapter = idxer.new
           if adapter.async?(indexable) && !@@testing_mode &&  !bulk_connection
-            Elastic::Rebound::IndexJob.perform_async( adapter.class.name, indexable.id, indexable.class.name,false)
+            Elastic::Rebound::IndexJob.perform_async( adapter.class.name, indexable.id, clazz.name,false)
           else
             data = adapter.index_data(indexable)
             adapter.index(data,@@testing_mode,bulk_connection)
@@ -97,8 +100,9 @@ module Elastic
 
 
     def self.flush_index(kind)
-       if Elastic::Rebound.config[:object_types][kind.name.to_sym]
-         Elastic::Rebound.config[:object_types][kind.name.to_sym][:indexers].each_pair do |idxer,value|
+      clazz = Elastic::Rebound.object_class(kind)
+       if Elastic::Rebound.config[:object_types][clazz.name.to_sym]
+         Elastic::Rebound.config[:object_types][clazz.name.to_sym][:indexers].each_pair do |idxer,value|
            adapter = idxer.new
            adapter.refresh_index
          end
@@ -107,12 +111,32 @@ module Elastic
 
 
 
+    # Based on the class sent it we will find out if it is an active record class
+    # if it is then we will find the base class and return that.  That is
+    # really what we want to index.
+    def self.object_class(clazz)
+      the_class = clazz
+
+      unless clazz.kind_of?(Class)
+        the_class = clazz.class
+      end
+
+      if defined?(ActiveRecord::Base)
+        return the_class.base_class
+
+      end
+
+      the_class
+    end
+
     def self.reindex_all(kind_to_index,options = {})
       adaptors = []
 
       bulk_client =  Elastic::Rebound.client
 
-      Elastic::Rebound.config[:object_types][kind_to_index.name.to_sym][:indexers].each_pair do |idxer,value|
+      clazz = Elastic::Rebound.object_class(kind_to_index)
+
+      Elastic::Rebound.config[:object_types][clazz.name.to_sym][:indexers].each_pair do |idxer,value|
         adaptors << idxer.new
       end
 

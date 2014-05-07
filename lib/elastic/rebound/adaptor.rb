@@ -112,9 +112,9 @@ module Elastic
       #
       def reset_index_and_mapping
 
-        if Elastic::Rebound.client.exists(index: @index_name)
-          Elastic::Rebound.client.delete_mapping(index: @index_name, type: @object_name) rescue nil
-          Elastic::Rebound.client.delete(index: @index_name) rescue nil
+        if Elastic::Rebound.client.indices.exists(index: @index_name)
+          Elastic::Rebound.client.indices.delete_mapping(index: @index_name, type: @object_name) rescue nil
+          Elastic::Rebound.client.indices.delete(index: @index_name) rescue nil
         end
 
 

@@ -23,10 +23,8 @@ class SimpleIndexAdaptor < Elastic::Rebound::Adaptor
           result = create_search_result
 
           search_options = {:from => 0, :size => 10}
-          search_options[:index] = @index_name
-          search_options[:type] = @object_type
 
-          result.hit = Elastic::Rebound.client.search({:query => query}, search_options)
+          result.hit = Elastic::Rebound.client.search(index: @index_name, body:{:query => query}.merge(search_options))
 
           result
         end

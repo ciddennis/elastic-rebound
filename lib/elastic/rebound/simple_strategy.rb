@@ -75,13 +75,11 @@ module Elastic
         search_options = {:from => (@page) * @per_page, :size => @per_page}
         search_options[:sort] = @sort if @sort
 
-        search_options[:index] = @index_name
-        search_options[:type] = @object_type
           #search_options[:explain] = true
 
         result = create_search_result
 
-        result.hit = Elastic::Rebound.client.search({:query => query}, search_options)
+        result.hit = Elastic::Rebound.client.search(index: @index_name, body: {:query => query}.merge(search_options))
 
         result
       end

@@ -46,15 +46,12 @@ module Elastic
       #
       def index(data, refresh = false,batch_connection = nil)
         connection  =  batch_connection ||  Elastic::Rebound.client
-        if data.kind_of?(Array)
-            data.each do |d|
-              connection.index(d, :type => @object_name, :index => @index_name, :id => d[:id])
-            end
-        else
-          connection.index(data, :type => @object_name, :index => @index_name, :id => data[:id])
+        data = [data].flatten
+
+        data.each do |d|
+          connection.index(index: @index_name, :id => d[:id], type: @object_name, body: d, refresh: refresh)
         end
 
-        refresh_index if refresh && !batch_connection
       end
 
       #
@@ -67,8 +64,7 @@ module Elastic
       def unindex(object_id, refresh = false,batch_connection = nil)
         connection  =  batch_connection ||  Elastic::Rebound.client
         if object_id
-          connection.delete(object_id, :type => @object_name, :index => @index_name)
-          refresh_index if refresh  && !batch_connection
+          connection.delete(index: @index_name, type: @object_name, id: object_id, refresh: refresh)
         end
       end
 
@@ -76,7 +72,7 @@ module Elastic
       # Tell elastic search to refresh its search index so data is available right away.
       #
       def refresh_index
-        Elastic::Rebound.client.refresh({:index => @index_name})
+        Elastic::Rebound.client.refresh(index: @index_name)
       end
 
       #
@@ -108,7 +104,7 @@ module Elastic
       # @see Elastic search mapping documentation.
       #
       def update_mapping(mapping)
-        Elastic::Rebound.client.update_mapping(mapping, {:index => @index_name, :type => @object_name})
+        Elastic::Rebound.client.put_mapping(index: @index_name, type: @object_name, body: mapping)
       end
 
       #
@@ -116,9 +112,9 @@ module Elastic
       #
       def reset_index_and_mapping
 
-        if Elastic::Rebound.client.index_exists?(@index_name)
-          Elastic::Rebound.client.delete_mapping({:index => @index_name, :type => @object_name}) rescue nil
-          Elastic::Rebound.client.delete_index @index_name rescue nil
+        if Elastic::Rebound.client.exists(index: @index_name)
+          Elastic::Rebound.client.delete_mapping(index: @index_name, type: @object_name) rescue nil
+          Elastic::Rebound.client.delete(index: @index_name) rescue nil
         end
 
 

@@ -1,12 +1,17 @@
 module Elastic
   module Rebound
     class Result
+      require 'hashie'
 
       attr_accessor :hit, :strategy, :cached_objects
 
       def initialize(strategy)
         @strategy = strategy
         @cached_objects = nil
+      end
+
+      def hit=(result)
+        @hit = Hashie::Mash.new(result)
       end
 
       # Retrieve the results from elastic search.
@@ -16,8 +21,8 @@ module Elastic
 
         if objects
           return @cached_objects if @cached_objects
-          ids = @hit.hits.map(&:id)
-          objects = @strategy.object_type.camelize.constantize.where("id in (?)", ids)
+          ids = @hit.hits.hits.map(&:_id)
+          objects = @strategy.object_type.camelize.constantize.where("id in (?)", ids).load
           @cached_objects = objects.sort_by { |e| ids.index(e.id) }
         else
           @hit.hits
@@ -26,7 +31,7 @@ module Elastic
       end
 
       def total
-        @hit.total_count
+        @hit.hits.total
       end
     end
   end

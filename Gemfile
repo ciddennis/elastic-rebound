@@ -4,6 +4,8 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'sidekiq'
+gem 'elasticsearch'
+gem 'hashie'
 
 platform :jruby do
   gem "jdbc-sqlite3"

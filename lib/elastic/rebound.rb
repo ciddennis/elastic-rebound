@@ -1,4 +1,4 @@
-require 'rubberband'
+require 'elasticsearch'
 require "elastic/rebound/version"
 require "elastic/rebound/adaptor"
 require "elastic/rebound/index_job"
@@ -7,7 +7,6 @@ require "elastic/rebound/result"
 require "elastic/rebound/simple_strategy"
 require "elastic/rebound/strategy"
 require "elastic/rebound/active_callback"
-require "resque"
 
 
 module Elastic
@@ -49,12 +48,7 @@ module Elastic
     end
 
     def self.client(options = {})
-      ElasticSearch.new(Elastic::Rebound.config[:elastic_search_url], options.merge({:auto_discovery => false}))
-    end
-
-    def self.status
-      index =   Elastic::Rebound.config[:object_types].try(:[],:indexers).try(:[],0)
-      Elastic::Rebound.index_status(index) if index
+      Elasticsearch::Client.new({url: Elastic::Rebound.config[:elastic_search_url]}.merge(options))
     end
 
     # Given a object to index it will find that object type in the configration and
@@ -147,14 +141,14 @@ module Elastic
       kind_to_index.find_in_batches(options) do  |group|
         index_data = []
 
-        bulk_client.bulk do |batch|
+        # bulk_client.bulk do |batch|
           group.each do |o|
 
             adaptors.each do |a|
-              a.index(a.index_data(o),false,batch)
+              a.index(a.index_data(o),false)
             end
           end
-        end
+        # end
       end
 
       adaptors.each do |a|

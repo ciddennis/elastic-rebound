@@ -1,7 +1,7 @@
 module Elastic
   module Rebound
     class Result
-      require 'hashie'
+      # require 'hashie'
 
       attr_accessor :hit, :strategy, :cached_objects
 
@@ -11,7 +11,7 @@ module Elastic
       end
 
       def hit=(result)
-        @hit = Hashie::Mash.new(result)
+        @hit = OpenStruct.new(result)
       end
 
       # Retrieve the results from elastic search.

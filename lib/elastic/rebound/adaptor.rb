@@ -104,7 +104,7 @@ module Elastic
       # @see Elastic search mapping documentation.
       #
       def update_mapping(mapping)
-        Elastic::Rebound.client.put_mapping(index: @index_name, type: @object_name, body: mapping)
+        Elastic::Rebound.client.indices.put_mapping(index: @index_name, type: @object_name, body: mapping)
       end
 
       #

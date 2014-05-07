@@ -21,7 +21,7 @@ module Elastic
 
         if objects
           return @cached_objects if @cached_objects
-          ids = @hit.hits.hits.collect { |c| c["_id"]}
+          ids = @hit["hits"]["hits"].collect { |c| c["_id"]}
           objects = @strategy.object_type.camelize.constantize.where("id in (?)", ids).load
           @cached_objects = objects.sort_by { |e| ids.index(e.id) }
         else
@@ -31,7 +31,7 @@ module Elastic
       end
 
       def total
-        @hit.hits["total"]
+        @hit["hits"]["total"]
       end
     end
   end

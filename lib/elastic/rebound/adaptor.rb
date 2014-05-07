@@ -72,7 +72,7 @@ module Elastic
       # Tell elastic search to refresh its search index so data is available right away.
       #
       def refresh_index
-        Elastic::Rebound.client.refresh(index: @index_name)
+        Elastic::Rebound.client.indices.refresh(index: @index_name)
       end
 
       #

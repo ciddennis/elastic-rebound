@@ -31,7 +31,6 @@ Gem::Specification.new do |spec|
   #
   spec.add_dependency "elasticsearch"
   spec.add_dependency "hashie"
-  spec.add_dependency 'resque'
 
   unless defined?(JRUBY_VERSION)
     spec.add_development_dependency "sqlite3"

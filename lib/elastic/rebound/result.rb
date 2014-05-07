@@ -1,28 +1,5 @@
 module Elastic
   module Rebound
-    require 'ostruct'
-
-    class DeepStruct < OpenStruct
-      def initialize(hash=nil)
-        @table = {}
-        @hash_table = {}
-
-        if hash
-          hash.each do |k,v|
-            @table[k.to_sym] = (v.is_a?(Hash) ? self.class.new(v) : v)
-            @hash_table[k.to_sym] = v
-
-            new_ostruct_member(k)
-          end
-        end
-      end
-
-      def to_h
-        @hash_table
-      end
-
-    end
-
     class Result
       # require 'hashie'
 
@@ -34,7 +11,7 @@ module Elastic
       end
 
       def hit=(result)
-        @hit = DeepStruct.new(result)
+        @hit = result
       end
 
       # Retrieve the results from elastic search.
@@ -44,7 +21,7 @@ module Elastic
 
         if objects
           return @cached_objects if @cached_objects
-          ids = @hit.hits.hits.map(&:id)
+          ids = @hit.hits.hits.collect { |c| c["_id"]}
           objects = @strategy.object_type.camelize.constantize.where("id in (?)", ids).load
           @cached_objects = objects.sort_by { |e| ids.index(e.id) }
         else
@@ -54,7 +31,7 @@ module Elastic
       end
 
       def total
-        @hit.hits.total
+        @hit.hits["total"]
       end
     end
   end

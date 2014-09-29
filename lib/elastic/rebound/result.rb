@@ -17,12 +17,18 @@ module Elastic
       # Retrieve the results from elastic search.
       # @param objects If true this will return an array of object from the database instead of the
       #       elastic search results
-      def results(objects = false)
+      def results(objects = false, includes = nil)
 
         if objects
           return @cached_objects if @cached_objects
           ids = @hit["hits"]["hits"].collect { |c| c["_id"]}
-          objects = @strategy.object_type.camelize.constantize.where("id in (?)", ids).load
+          objects = nil
+          if includes
+            objects = @strategy.object_type.camelize.constantize.where("id in (?)", ids).includes(includes).load
+          else
+            objects = @strategy.object_type.camelize.constantize.where("id in (?)", ids).load
+          end
+
           @cached_objects = objects.sort_by { |e| ids.index(e.id) }
         else
           @hit.hits
